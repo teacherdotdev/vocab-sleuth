@@ -34,10 +34,10 @@ export function PrivacyPage() {
           <p className="mt-4 text-sm leading-relaxed text-slate-700">
             Questions or concerns? Email{' '}
             <a
-              href="mailto:directors@edtechathon.com?subject=vocabsleuth%20privacy"
+              href="mailto:support@teacher.dev?subject=vocabsleuth%20privacy"
               className="font-medium text-amber-700 underline-offset-4 hover:underline"
             >
-              directors@edtechathon.com
+              support@teacher.dev
             </a>
             .
           </p>
