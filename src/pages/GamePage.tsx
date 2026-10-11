@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react'
 import type { GradeId, GradeMeta } from '../types'
 import { GRADES, getGrade } from '../lib/grades'
 import { loadSelectedGrade, saveSelectedGrade } from '../lib/storage'
@@ -51,10 +51,37 @@ export function GamePage() {
   )
 }
 
-// Crawler-readable description of the game, collapsed into a "for teachers"
-// disclosure in the footer so the page is just the game. The same file is baked into index.html at build
-// time (see the seo-pages plugin in vite.config.ts).
+// Crawler-readable description of the game, in a drawer opened from the
+// footer's "for teachers" link (from the right on desktop, from the bottom on
+// mobile) so the page is just the game. The drawer stays in the DOM while
+// closed, only moved off screen, and the same file is baked into index.html at
+// build time (see the seo-pages plugin in vite.config.ts).
 function Intro() {
+  const [open, setOpen] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    panelRef.current?.focus()
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = overflow
+    }
+  }, [open])
+
+  const close = () => {
+    setOpen(false)
+    buttonRef.current?.focus()
+  }
+
+  // Keep typing inside the drawer away from the game's window keydown listener.
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    e.stopPropagation()
+    if (e.key === 'Escape') close()
+  }
+
   const onClick = (e: MouseEvent<HTMLDivElement>) => {
     const link = (e.target as Element).closest('a')
     const href = link?.getAttribute('href')
@@ -63,7 +90,53 @@ function Intro() {
     e.preventDefault()
     navigate(href)
   }
-  return <div onClick={onClick} className="contents" dangerouslySetInnerHTML={{ __html: introHtml }} />
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-expanded={open}
+        aria-controls="intro-drawer"
+        className="text-sm text-slate-500 hover:text-amber-700"
+      >
+        for teachers
+      </button>
+      <div
+        aria-hidden="true"
+        onClick={close}
+        className={`fixed inset-0 z-40 bg-slate-900/40 transition-opacity duration-300 ${
+          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      />
+      <div
+        id="intro-drawer"
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="intro-title"
+        tabIndex={-1}
+        inert={!open}
+        onKeyDown={onKeyDown}
+        className={`fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white text-left outline-none transition-transform duration-300 ease-out md:inset-y-0 md:left-auto md:max-h-none md:w-[28rem] md:rounded-none ${
+          open ? 'translate-y-0 shadow-2xl md:translate-x-0' : 'translate-y-full md:translate-x-full md:translate-y-0'
+        }`}
+      >
+        <div className="sticky top-0 flex justify-end bg-white px-3 pt-3">
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close"
+            className="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+          >
+            ✕
+          </button>
+        </div>
+        <div onClick={onClick} dangerouslySetInnerHTML={{ __html: introHtml }} />
+      </div>
+    </>
+  )
 }
 
 function GamePreview() {
