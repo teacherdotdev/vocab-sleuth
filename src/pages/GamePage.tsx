@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type MouseEvent } from 'react'
 import type { GradeId, GradeMeta } from '../types'
 import { GRADES, getGrade } from '../lib/grades'
 import { loadSelectedGrade, saveSelectedGrade } from '../lib/storage'
@@ -9,6 +9,8 @@ import { GradeModal } from '../components/GradeModal'
 import { Board } from '../components/Board'
 import { Keyboard } from '../components/Keyboard'
 import { EndBanner } from '../components/EndBanner'
+import { navigate } from '../hooks/useRoute'
+import introHtml from '../content/intro.html?raw'
 
 export function GamePage() {
   const [gradeId, setGradeId] = useState<GradeId | null>(() => loadSelectedGrade())
@@ -23,28 +25,46 @@ export function GamePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-      <Header rightLink={{ href: '/words', label: 'Word Lists' }} />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-6 px-4 py-6">
-        {grade ? (
-          <GameBody
-            key={grade.id}
-            grade={grade}
-            onChangeGrade={() => setModalOpen(true)}
-          />
-        ) : (
-          <GamePreview />
-        )}
-      </main>
-      <GradeModal
-        open={modalOpen}
-        onSelect={handleSelect}
-        onClose={gradeId ? () => setModalOpen(false) : undefined}
-        currentGrade={gradeId}
-      />
-      <Footer />
+    <div className="bg-slate-50 text-slate-900">
+      <div className="flex min-h-screen flex-col">
+        <Header rightLink={{ href: '/words', label: 'Word Lists' }} />
+        <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-6 px-4 py-6">
+          {grade ? (
+            <GameBody
+              key={grade.id}
+              grade={grade}
+              onChangeGrade={() => setModalOpen(true)}
+            />
+          ) : (
+            <GamePreview />
+          )}
+        </main>
+        <GradeModal
+          open={modalOpen}
+          onSelect={handleSelect}
+          onClose={gradeId ? () => setModalOpen(false) : undefined}
+          currentGrade={gradeId}
+        />
+        <Footer />
+      </div>
+      <Intro />
     </div>
   )
+}
+
+// Crawler-readable description of the game, kept below the fold so the first
+// screen is just the game. The same file is baked into index.html at build
+// time (see the seo-pages plugin in vite.config.ts).
+function Intro() {
+  const onClick = (e: MouseEvent<HTMLDivElement>) => {
+    const link = (e.target as Element).closest('a')
+    const href = link?.getAttribute('href')
+    if (!href?.startsWith('/')) return
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    e.preventDefault()
+    navigate(href)
+  }
+  return <div onClick={onClick} dangerouslySetInnerHTML={{ __html: introHtml }} />
 }
 
 function GamePreview() {
