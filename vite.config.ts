@@ -97,8 +97,9 @@ function headTags(page: PageMeta, intro: string): string {
 }
 
 // Gives crawlers real text and per-route metadata without SSR. index.html gets
-// the home page's head tags plus the intro copy GamePage renders below the
-// game (behind a screen-tall spacer, matching the rendered layout). At build
+// the home page's head tags plus the intro copy GamePage renders collapsed
+// in the footer (pinned to the bottom of the screen, matching the rendered
+// layout). At build
 // time, every other route gets its own copy of index.html (words.html, ...)
 // with its own head tags and an empty root; vercel.json's cleanUrls serves
 // them at /words etc.
@@ -111,7 +112,7 @@ function seoPages(): Plugin {
         .replace(HEAD_MARK, headTags(PAGES[0], intro))
         .replace(
           ROOT_MARK,
-          `<div id="root">\n      <div class="min-h-screen"></div>\n      ${intro.trim()}\n      <!-- /root -->\n    </div>`,
+          `<div id="root">\n      <div class="flex min-h-screen flex-col"><div class="flex-1"></div>\n      ${intro.trim()}\n      </div>\n      <!-- /root -->\n    </div>`,
         )
     },
     generateBundle: {

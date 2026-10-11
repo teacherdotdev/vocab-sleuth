@@ -25,35 +25,34 @@ export function GamePage() {
   }
 
   return (
-    <div className="bg-slate-50 text-slate-900">
-      <div className="flex min-h-screen flex-col">
-        <Header rightLink={{ href: '/words', label: 'Word Lists' }} />
-        <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-6 px-4 py-6">
-          {grade ? (
-            <GameBody
-              key={grade.id}
-              grade={grade}
-              onChangeGrade={() => setModalOpen(true)}
-            />
-          ) : (
-            <GamePreview />
-          )}
-        </main>
-        <GradeModal
-          open={modalOpen}
-          onSelect={handleSelect}
-          onClose={gradeId ? () => setModalOpen(false) : undefined}
-          currentGrade={gradeId}
-        />
-        <Footer />
-      </div>
-      <Intro />
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <Header rightLink={{ href: '/words', label: 'Word Lists' }} />
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-6 px-4 py-6">
+        {grade ? (
+          <GameBody
+            key={grade.id}
+            grade={grade}
+            onChangeGrade={() => setModalOpen(true)}
+          />
+        ) : (
+          <GamePreview />
+        )}
+      </main>
+      <GradeModal
+        open={modalOpen}
+        onSelect={handleSelect}
+        onClose={gradeId ? () => setModalOpen(false) : undefined}
+        currentGrade={gradeId}
+      />
+      <Footer>
+        <Intro />
+      </Footer>
     </div>
   )
 }
 
-// Crawler-readable description of the game, kept below the fold so the first
-// screen is just the game. The same file is baked into index.html at build
+// Crawler-readable description of the game, collapsed into a "for teachers"
+// disclosure in the footer so the page is just the game. The same file is baked into index.html at build
 // time (see the seo-pages plugin in vite.config.ts).
 function Intro() {
   const onClick = (e: MouseEvent<HTMLDivElement>) => {
@@ -64,7 +63,7 @@ function Intro() {
     e.preventDefault()
     navigate(href)
   }
-  return <div onClick={onClick} dangerouslySetInnerHTML={{ __html: introHtml }} />
+  return <div onClick={onClick} className="contents" dangerouslySetInnerHTML={{ __html: introHtml }} />
 }
 
 function GamePreview() {

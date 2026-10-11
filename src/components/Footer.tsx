@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react'
 import edtechathonLogo from '../assets/logo.svg'
 import { Link } from './Link'
 
-export function Footer() {
+export function Footer({ children }: { children?: ReactNode }) {
   return (
     <footer className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 pb-4 text-center">
       <a
@@ -19,6 +20,7 @@ export function Footer() {
       <Link href="/privacy" className="text-sm text-slate-500 hover:text-amber-700">
         privacy
       </Link>
+      {children}
     </footer>
   )
 }
